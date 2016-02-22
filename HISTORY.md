@@ -46,6 +46,11 @@ Accessibility features provided by `ally.js` have been removed from the Modal co
 * fixed: Modal component nulls document overflow on close
 * fixed; The Modal component _should_ be safe for server-side rendering
 
+## v0.5.8-j5int / 2015-12-14
+
+* changed; Added the ability to set arbitrary props on a Glyph component to allow for things such as setting up an `onClick` handler, etc.
+* changed (well fixed in a broken way if you want to be pedantic); Removed the octicons import since this results in a request for a cdn-hosted resource. If the package using elemental requires the octicons, the responibilty lies with it to include these.
+
 ## v0.5.8 / 2015-12-14
 
 * fixed; Accessibility handlers in the Modal component are only bound when the `isOpen` prop changes
