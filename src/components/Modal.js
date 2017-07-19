@@ -3,30 +3,34 @@ import ReactDOM from 'react-dom';
 import Transition from 'react-addons-css-transition-group';
 import blacklist from 'blacklist';
 import classNames from 'classnames';
-import ally from 'ally.js';
+
+import { canUseDOM } from '../constants';
 
 const TransitionPortal = React.createClass({
 	displayName: 'TransitionPortal',
-	portalElement: null,
-	render: () => null,
 	componentDidMount() {
+		if (!canUseDOM) return;
 		let p = document.createElement('div');
 		document.body.appendChild(p);
 		this.portalElement = p;
 		this.componentDidUpdate();
 	},
+	componentDidUpdate() {
+		if (!canUseDOM) return;
+		ReactDOM.render(<Transition {...this.props}>{this.props.children}</Transition>, this.portalElement);
+	},
 	componentWillUnmount() {
+		if (!canUseDOM) return;
 		document.body.removeChild(this.portalElement);
 	},
-	componentDidUpdate() {
-		ReactDOM.render(<Transition {...this.props}>{this.props.children}</Transition>, this.portalElement);
-	}
+	portalElement: null,
+	render: () => null,
 });
 
 module.exports = React.createClass({
 	displayName: 'Modal',
 	propTypes: {
-		autofocusFirstElement: React.PropTypes.bool,
+		autoFocusFirstElement: React.PropTypes.bool,
 		backdropClosesModal: React.PropTypes.bool,
 		className: React.PropTypes.string,
 		isOpen: React.PropTypes.bool,
@@ -38,17 +42,20 @@ module.exports = React.createClass({
 	},
 	getDefaultProps () {
 		return {
-			width: 'medium'
+			width: 'medium',
 		};
 	},
 	componentWillReceiveProps: function(nextProps) {
+		if (!canUseDOM) return;
 		if (!this.props.isOpen && nextProps.isOpen) {
-			setTimeout(() => this.handleAccessibility());
+			// setTimeout(() => this.handleAccessibility());
 			document.body.style.overflow = 'hidden';
 		} else if (this.props.isOpen && !nextProps.isOpen) {
-			setTimeout(() => this.removeAccessibilityHandlers());
+			// setTimeout(() => this.removeAccessibilityHandlers());
+			document.body.style.overflow = null;
 		}
 	},
+	/*
 	handleAccessibility () {
 		// Remember the element that was focused before we opened the modal
 		// so we can return focus to it once we close the modal.
@@ -60,13 +67,13 @@ module.exports = React.createClass({
 		// and passing focus to it, otherwise the browser
 		// might scroll the document to reveal the element
 		// receiving focus
-		if (this.props.autofocusFirstElement) {
+		if (this.props.autoFocusFirstElement) {
 			ally.when.visibleArea({
 				context: this.modalElement,
 				callback: function(context) {
 					// the modal is visible on screen, so find the first
 					// keyboard focusable element (giving any element with
-					// autofocus attribute precendence). If the modal does
+					// autoFocus attribute precendence). If the modal does
 					// not contain any keyboard focusabe elements, focus will
 					// be given to the modal itself.
 					var element = ally.query.firstTabbable({
@@ -113,17 +120,15 @@ module.exports = React.createClass({
 	handleModalClick (event) {
 		if (event.target.dataset.modal) this.handleClose();
 	},
+	*/
 	handleClose () {
-		document.body.style.overflow = null;
 		this.props.onCancel();
 	},
 	renderDialog() {
 		if (!this.props.isOpen) return;
-
 		let dialogClassname = classNames('Modal-dialog', (this.props.width && isNaN(this.props.width)) ? (
 			'Modal-dialog--' + this.props.width
 		) : null);
-
 		return (
 			<div className={dialogClassname} style={(this.props.width && !isNaN(this.props.width)) ? { width: this.props.width + 20 } : null}>
 				<div ref={ref => { this.modalElement = ref; }} className="Modal-content">
@@ -134,19 +139,16 @@ module.exports = React.createClass({
 	},
 	renderBackdrop() {
 		if (!this.props.isOpen) return;
-
 		return <div className="Modal-backdrop" onClick={this.props.backdropClosesModal ? this.handleClose : null} />;
 	},
 	render() {
 		var className = classNames('Modal', {
-			'is-open': this.props.isOpen
+			'is-open': this.props.isOpen,
 		}, this.props.className);
-
 		var props = blacklist(this.props, 'backdropClosesModal', 'className', 'isOpen', 'onCancel');
-
 		return (
 			<div>
-				<TransitionPortal {...props} data-modal="true" className={className} onClick={this.handleModalClick} transitionName="Modal-dialog" transitionEnterTimeout={260} transitionLeaveTimeout={140} component="div">
+				<TransitionPortal {...props} data-modal="true" className={className} /*onClick={this.handleModalClick}*/ transitionName="Modal-dialog" transitionEnterTimeout={260} transitionLeaveTimeout={140} component="div">
 					{this.renderDialog()}
 				</TransitionPortal>
 				<TransitionPortal transitionName="Modal-background" transitionEnterTimeout={140} transitionLeaveTimeout={240} component="div">
@@ -154,7 +156,7 @@ module.exports = React.createClass({
 				</TransitionPortal>
 			</div>
 		);
-	}
+	},
 });
 
 
