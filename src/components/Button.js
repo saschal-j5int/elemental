@@ -20,6 +20,10 @@ const BUTTON_TYPES = [
 	'danger',
 	'link',
 	'link-text',
+	'link-primary',
+	'link-success',
+	'link-warning',
+	'link-danger',
 	'link-cancel',
 	'link-delete',
 ];
@@ -55,7 +59,7 @@ module.exports = React.createClass({
 		);
 
 		// props
-		var props = blacklist(this.props, 'type', 'size', 'component', 'className');
+		var props = blacklist(this.props, 'type', 'size', 'component', 'className', 'submit');
 		props.className = componentClass;
 
 		if (this.props.component) {
